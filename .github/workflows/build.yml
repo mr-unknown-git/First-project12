@@ -27,22 +27,34 @@ jobs:
 
       - name: Build APK
         run: |
-          # 1. Create the buildozer.spec file automatically
-          buildozer init
-          
-          # 2. Fix the build-tools version manually in the spec file (Fixes Aidl error)
-          sed -i 's/# android.build-tools/# android.build-tools/g' buildozer.spec
-          sed -i 's/android.build-tools.*/android.build-tools = 33.0.0/' buildozer.spec
-          
-          # 3. Enable license auto-acceptance (Fixes License error)
-          sed -i 's/# android.acceptlicenses/# android.acceptlicenses/g' buildozer.spec
-          sed -i 's/android.acceptlicenses.*/android.acceptlicenses = 1/' buildozer.spec
-          
-          # 4. Update API and NDK to stable modern versions
-          sed -i 's/android.api.*/android.api = 33/' buildozer.spec
-          sed -i 's/android.ndk.*/android.ndk = 25b/' buildozer.spec
-          
-          # 5. Run the build
+          # 1. Manually write the buildozer.spec file to ensure settings are correct
+          # This bypasses the license prompt and sets stable build tools
+          cat << 'EOF' > buildozer.spec
+          [app]
+
+          title = TikTok View Bot
+          package.name = tiktokviewbot
+          package.domain = org.tiktokviewbot
+          source.dir = .
+
+          source.include_exts = py,png,jpg,kv,atlas
+          requirements = python3,kivy,httpx
+          requirements.source = kivy
+
+          version = 1.0
+
+          orientation = portrait
+
+          android.arch = arm64-v8a
+          android.api = 33
+          android.minapi = 21
+          android.ndk = 25b
+          android.build-tools = 33.0.0
+          android.acceptlicenses = 1
+          android.private_storage = True
+          EOF
+
+          # 2. Run the build
           buildozer -v android debug
 
       - name: Upload APK
