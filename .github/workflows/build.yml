@@ -9,7 +9,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -18,13 +19,17 @@ jobs:
 
       - name: Install Buildozer & Dependencies
         run: |
+          # Upgrade pip first
+          pip install --upgrade pip
+          # Install buildozer and cython
           pip install buildozer cython
+          # Install Java 17 (Required for modern Android SDK)
           sudo apt-get update
-          sudo apt-get install -y openjdk-17-jdk zip unzip
+          sudo apt-get install -y openjdk-17-jdk zip unzip wget
 
       - name: Build APK
         run: |
-          buildozer init
+          # We use --verbose to see exactly where it fails
           buildozer -v android debug
 
       - name: Upload APK
