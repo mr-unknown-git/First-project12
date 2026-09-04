@@ -27,8 +27,10 @@ jobs:
 
       - name: Build APK
         run: |
-          # 1. Manually write the buildozer.spec file to ensure settings are correct
-          # This bypasses the license prompt and sets stable build tools
+          # 1. FORCE CLEAN: Delete the .buildozer folder to remove old failed installations
+          rm -rf .buildozer
+
+          # 2. Manually write the buildozer.spec file
           cat << 'EOF' > buildozer.spec
           [app]
 
@@ -54,9 +56,8 @@ jobs:
           android.private_storage = True
           EOF
 
-          # 2. Run the build
+          # 3. Run the build
           buildozer -v android debug
-          rm -rf .buildozer
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
