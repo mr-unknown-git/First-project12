@@ -1,3 +1,4 @@
+# filename=".github/workflows/build.yml"
 name: Build TikTok View Bot APK
 
 on:
@@ -19,17 +20,29 @@ jobs:
 
       - name: Install Buildozer & Dependencies
         run: |
-          # Upgrade pip first
           pip install --upgrade pip
-          # Install buildozer and cython
           pip install buildozer cython
-          # Install Java 17 (Required for modern Android SDK)
           sudo apt-get update
           sudo apt-get install -y openjdk-17-jdk zip unzip wget
 
       - name: Build APK
         run: |
-          # We use --verbose to see exactly where it fails
+          # 1. Create the buildozer.spec file automatically
+          buildozer init
+          
+          # 2. Fix the build-tools version manually in the spec file (Fixes Aidl error)
+          sed -i 's/# android.build-tools/# android.build-tools/g' buildozer.spec
+          sed -i 's/android.build-tools.*/android.build-tools = 33.0.0/' buildozer.spec
+          
+          # 3. Enable license auto-acceptance (Fixes License error)
+          sed -i 's/# android.acceptlicenses/# android.acceptlicenses/g' buildozer.spec
+          sed -i 's/android.acceptlicenses.*/android.acceptlicenses = 1/' buildozer.spec
+          
+          # 4. Update API and NDK to stable modern versions
+          sed -i 's/android.api.*/android.api = 33/' buildozer.spec
+          sed -i 's/android.ndk.*/android.ndk = 25b/' buildozer.spec
+          
+          # 5. Run the build
           buildozer -v android debug
 
       - name: Upload APK
